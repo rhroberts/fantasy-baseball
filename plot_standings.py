@@ -1,9 +1,6 @@
 # Given a user specified week#, plot_standings.py will look for
 # csv files (standings_wk*_clean.csv) and plot the weekly standings
 # of the hometown homies fantasy league
-# NOTE: currently this only works for the most current week
-# i.e., trying to plot previous weeks doesn't place the team logos
-# corretly -- need to fix this
 
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -112,7 +109,7 @@ for i, team in enumerate(games_back.index):
     rgbs = np.concatenate((image[0], image[1], image[2]))
     rgb = stats.mode(rgbs)[0][0]
     # plot line of games_back data
-    ax.plot(x_int, y, linewidth=4, c=rgb, zorder=zo)
+    ax.plot(x_int[:current_week+1], y[:current_week+1], linewidth=4, c=rgb, zorder=zo)
 
 ax.set_xticks(np.arange(0,14))
 ax.set_xticklabels(games_back.columns)
