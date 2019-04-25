@@ -19,7 +19,7 @@ def manual_info():
         'Soggy Dingers',
         "Curt's American Made",
         "Luke's Legit Team",
-        "Marcus Bakke's Team",
+        "Hello World",
         "Mookie and the Betts",
         "Chuck Nazty",
         "Lone Star Tallboys",

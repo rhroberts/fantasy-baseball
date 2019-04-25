@@ -1,5 +1,5 @@
 1 	logo Curt’s American Made 	18-10-2 	.633 	- 	8-2-0 	7 	-
-2 	logo Marcus Bakke's Team 	16-12-2 	.567 	2 	5-5-0 	5 	1
+2 	logo Hello World 	16-12-2 	.567 	2 	5-5-0 	5 	1
 3 	logo Soggy Dingers 	17-13-0 	.567 	2 	5-5-0 	3 	6
 4 	logo Mookie and the Betts 	15-13-2 	.533 	3 	8-2-0 	6 	-
 5 	logo Luke's Legit Team 	13-14-3 	.483 	4.5 	2-6-2 	1 	-
@@ -26,7 +26,7 @@ Chuck Nazty Apr 22, 8:19 am logo
 Clint Frazier NYY - OF
 Free Agent
 	
-Marcus Bakke's Team Apr 22, 6:25 am logo
+Hello World Apr 22, 6:25 am logo
  	
 Matthew Boyd Det - SP
 Free Agent

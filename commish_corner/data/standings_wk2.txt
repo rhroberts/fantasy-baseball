@@ -1,4 +1,4 @@
-1 	logo Marcus Bakke's Team 	11-7-2 	.600 	- 	6-3-1 	6 	-
+1 	logo Hello World 	11-7-2 	.600 	- 	6-3-1 	6 	-
 2 	logo Soggy Dingers 	12-8-0 	.600 	- 	4-6-0 	3 	6
 3 	logo Luke's Legit Team 	11-8-1 	.575 	0.5 	6-4-0 	1 	-
 4 	logo Chuck Nazty 	10-8-2 	.550 	1 	6-3-1 	2 	6

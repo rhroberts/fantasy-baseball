@@ -1,7 +1,7 @@
 1 	logo Soggy Dingers 	8-2-0 	.800 	- 	8-2-0 	3 	4
 2 	logo Curt’s American Made 	7-2-1 	.750 	0.5 	7-2-1 	8 	-
 3 	logo Luke's Legit Team 	5-4-1 	.550 	2.5 	5-4-1 	1 	-
-4 	logo Marcus Bakke's Team 	5-4-1 	.550 	2.5 	5-4-1 	6 	-
+4 	logo Hello World 	5-4-1 	.550 	2.5 	5-4-1 	6 	-
 5 	logo Mookie and the Betts 	4-5-1 	.450 	3.5 	4-5-1 	7 	-
 6 	logo Chuck Nazty 	4-5-1 	.450 	3.5 	4-5-1 	2 	6
 7 	logo Lone Star Tallboys 	2-7-1 	.250 	5.5 	2-7-1 	5 	2
