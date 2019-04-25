@@ -2,8 +2,8 @@
 from rauth import OAuth1Service
 import json
 
-auth_key = 'dj0yJmk9bXpycjhkTjJTdFhwJnM9Y29uc3VtZXJzZWNyZXQmc3Y9MCZ4PWZk'
-auth_secret = '0ae6007f4a053cf2dc061b4fae8d4d202158ce22'
+auth_key = 'YOURAUTHKEY'
+auth_secret = 'YOURAUTHSECRET'
 
 def new_decoder(payload):
     return json.loads(payload.decode('utf-8'))
