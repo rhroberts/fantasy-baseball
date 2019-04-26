@@ -9,5 +9,7 @@
 
 - fr tho how should we do this... -robo
 - no idea man, just trying to fuck with stuff -crt
+- PROTECT WILLIANS
 
-![willians](https://i.imgur.com/ktGKv0V.png)
+![willians](https://i.imgur.com/nCkWP3V.png)
+![tayne](https://i.imgur.com/ktGKv0V.png)
