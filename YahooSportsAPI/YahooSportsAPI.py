@@ -22,9 +22,26 @@ from yahoo_oauth import OAuth2
 class YahooSportsAPI:
 
     def getSession(self):
+        # Open Yahoo API Session
         oauth = OAuth2(None, None, from_file='./Authorization/oauth.json')
 
         if not oauth.token_is_valid():
             oauth.refresh_access_token()
 
         return oauth.session
+        
+    def getLeagueInfo(self,session):
+        # session = self.getSession()
+        # Get League Info
+        league_url = 'https://fantasysports.yahooapis.com/fantasy/v2/league/mlb.l.69542'
+        league_info = session.get(league_url, params={'format': 'json'})
+        
+        return league_info
+        
+    def getLeagueStandings(self,session):
+        # session = self.getSession()
+        # Get League Standings
+        standings_url = "https://fantasysports.yahooapis.com/fantasy/v2/league/mlb.l.69542/standings"
+        standings_info = session.get(standings_url, params={'format': 'json'})
+        
+        return standings_info
