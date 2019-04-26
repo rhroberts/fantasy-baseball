@@ -8,6 +8,6 @@
 ## Comments
 
 - fr tho how should we do this... -robo
-- no idea man, just trying to fuck with stuff
+- no idea man, just trying to fuck with stuff -crt
 
 ![willians](https://i.imgur.com/ktGKv0V.png)
