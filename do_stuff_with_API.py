@@ -1,22 +1,10 @@
-# Author:   Marcus Bakke
-
-from yahoo_oauth import OAuth2
+from YahooSportsAPI import YahooSportsAPI
 import ipdb
 import pandas as pd
 from pandas.io.json import json_normalize
 
-class YahooFantasyAPI:
-
-    def getSession(self):
-        oauth = OAuth2(None, None, from_file='./Authorization/oauth.json')
-
-        if not oauth.token_is_valid():
-            oauth.refresh_access_token()
-
-        return oauth.session
-
 # Initiate Class
-api = YahooFantasyAPI()
+api = YahooSportsAPI.YahooSportsAPI()
 
 # Open a session
 ses = api.getSession()
@@ -37,4 +25,3 @@ standings_info = ses.get(standings_url, params={'format': 'json'})
 # Need to disect the dictionary now
 ipdb.set_trace()
 data = json_normalize(standings_info.json(), [['fantasy_content', 'leagues', '0', 'league']])
-
