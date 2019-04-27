@@ -31,4 +31,8 @@ If you don't want it there, you can pass in an alternative.
 
 #  Usage
 
-TBD
+We won't make the scripts globally available for now. Head over to scripts/ to use them.
+It looks like they need to be adapted to pull data automatically using yahoo_api, now,
+but I haven't looked too closely.
+
+Looks like, run process to clean and process. You can call plot on the processed output
