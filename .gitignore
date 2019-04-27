@@ -1,5 +1,6 @@
 # python stuff to ignore
 __pycache__/
+*.egg-info/
 *.py[cod]
 *.$py.class
 Authorization/oauth.json
