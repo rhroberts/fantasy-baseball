@@ -16,6 +16,7 @@ then, from the project root, pip install this package ~in editable mode`
 pip install -e ./
 ```
 
+You can read some info here, I found it helpful a bit. - CRT
 ``` shell
 https://packaging.python.org/guides/installing-using-pip-and-virtual-environments/
 ```
