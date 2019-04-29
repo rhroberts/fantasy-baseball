@@ -16,6 +16,11 @@ then, from the project root, pip install this package ~in editable mode`
 pip install -e ./
 ```
 
+``` shell
+https://packaging.python.org/guides/installing-using-pip-and-virtual-environments/
+```
+
+
 Python copies packages to a subfolder of it's installation directory when you install them.
 If you want to actively hack away at a project and also have it installed, this is a problem.
 We solve this with editable mode, which drops a link in the installation directory back to
