@@ -19,4 +19,3 @@ matchup_info = yahoo_api.get_league_matchup(sess)
 matchup_dict = matchup_info.json()
 
 team_info = yahoo_api.get_league_team(sess)
-team_dict = team_info.json()
