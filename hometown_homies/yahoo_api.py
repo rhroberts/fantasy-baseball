@@ -25,7 +25,18 @@ def get_league_info(session):
 
 def get_league_standings(session):
     """Get leage standings from a Yahoo session object"""
-
     standings_info = session.get(LEAGUE_URL + '/standings', params={'format': 'json'})
     
     return standings_info
+
+def get_league_matchup(session):
+    """Get leage matchup from a Yahoo session object"""
+    matchup_info = session.get(LEAGUE_URL + '/matchup', params={'format': 'json'})
+    
+    return matchup_info
+
+def get_league_team(session):
+    """Get leage matchup from a Yahoo session object"""
+    team_info = session.get(LEAGUE_URL + '/teams', params={'format': 'json'})
+    
+    return team_info
