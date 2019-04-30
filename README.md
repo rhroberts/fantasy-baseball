@@ -1,4 +1,4 @@
-Some friends dabbling in sabermetrics and things.
+Some friends dabing in sabermetrics and things.
 
 Please see [CONTRIBUTING.md](./CONTRIBUTING.md) for guidance on how to contribute.
 
@@ -15,6 +15,12 @@ then, from the project root, pip install this package ~in editable mode`
 ``` shell
 pip install -e ./
 ```
+
+You can read some info here, I found it helpful a bit. - CRT
+``` shell
+https://packaging.python.org/guides/installing-using-pip-and-virtual-environments/
+```
+
 
 Python copies packages to a subfolder of it's installation directory when you install them.
 If you want to actively hack away at a project and also have it installed, this is a problem.
