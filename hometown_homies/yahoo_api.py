@@ -7,6 +7,7 @@ import pandas as pd
 LEAGUE_URL = 'https://fantasysports.yahooapis.com/fantasy/v2/'
 LEAGUE_ID = 'mlb.l.69542'
 
+
 def get_session(auth_file=None):
     """Get a valid yahoo session object"""
 
@@ -19,6 +20,7 @@ def get_session(auth_file=None):
         oauth.refresh_access_token()
 
     return oauth.session
+
 
 def get_league_info(session):
     """Get league info from a Yahoo session object"""
@@ -46,11 +48,52 @@ def get_league_info(session):
     
     return league_df
 
+
 def get_league_standings(session):
-    """Get leage standings from a Yahoo session object"""
-    standings_info = session.get(LEAGUE_URL + 'league/' + LEAGUE_ID + '/standings', params={'format': 'json'})
+    """Get dataframe of league standings from a Yahoo session object"""
+    standings_info = session.get(
+        LEAGUE_URL + 'league/' + LEAGUE_ID + \
+        '/standings', params={'format': 'json'}
+    ).json()
+    # digging out the relevent standings information
+    standings_dict = standings_info['fantasy_content']['league'][1]['standings'][0]['teams']
     
-    return standings_info
+    current_standings = {}
+    # keys are ['0', '1', ..., X', 'count'],
+    # where '0'-'X' are the teams
+    for key in standings_dict: 
+        if key != 'count':
+            team_info = standings_dict[key]['team']
+            team_name = team_info[0][2]['name']
+            team_standings = team_info[2]['team_standings']
+
+            # avoid type issues for '-' games back
+            if team_standings['games_back'] == '-':
+                team_standings['games_back'] = 0
+
+            team_standings_clean = {
+                'rank': int(team_standings['rank']),
+                'record': tuple(
+                    [
+                        team_standings['outcome_totals']['wins'],
+                        team_standings['outcome_totals']['losses'],
+                        team_standings['outcome_totals']['ties']
+                    ]
+                ),
+                'games_back': float(team_standings['games_back']),
+                'win_rate': float(team_standings['outcome_totals']['percentage'])
+            }
+            current_standings[team_name] = team_standings_clean
+    
+    # put standings table into dataframe and sort by team rank
+    standings_df = pd.DataFrame.from_dict(
+        current_standings, orient='index'
+    )        
+    standings_df.sort_values('rank', inplace=True)
+    standings_df.index.name = 'team'
+    
+    return standings_df
+
 
 def get_league_matchup(session,team_key,weeks):
     """Get leage matchup from a Yahoo session object"""
@@ -130,6 +173,7 @@ def get_league_matchup(session,team_key,weeks):
         matchup_df.append(week_i_df)
 
     return matchup_df
+
 
 def get_league_team(*arg):
     """Get basic team information from a Yahoo session object

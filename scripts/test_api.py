@@ -12,9 +12,9 @@ league_info = yahoo_api.get_league_info(sess)
 league_name = league_info.loc['name'].values[0]
 print(f"Our league name is: {league_name}!!!")
 
-standings_info = yahoo_api.get_league_standings(sess)
-standings_dict = standings_info.json()
-print("We got the standings but it's a big-ass dict.")
+standings_df = yahoo_api.get_league_standings(sess)
+print("Here's the current status of the league:")
+print(standings_df)
 
 # Example usage for get_league_team()
 team_info  = yahoo_api.get_league_team(sess,[0,1,2,3])  # Get team info for Rusty, Curtis, Tjos, and Luke
