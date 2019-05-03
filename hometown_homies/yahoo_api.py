@@ -175,7 +175,7 @@ def get_league_matchup(session,team_key,weeks):
     return matchup_df
 
 
-def get_league_team(*arg):
+def get_team_info(*arg):
     """Get basic team information from a Yahoo session object
     
     1. First argument is the sessions object for get_session().
@@ -244,3 +244,62 @@ def get_league_team(*arg):
     team_df = team_df.set_index('Variable')
     
     return team_df
+
+
+def get_team_stats(session):
+    """
+        Get basic team stats (season to date) from a Yahoo session object
+        Return a dataframe with info for all teams
+    """
+
+    # Preallocate variables
+    team_stats_clean = {}
+
+    # Map yahoo stat_id numbers to stat names
+    stat_id_map = {
+        '7': 'R',
+        '12': 'HR',
+        '13': 'RBI',
+        '16': 'SB',
+        '3': 'AVG',
+        '50': 'IP',
+        '28': 'W',
+        '32': 'SV',
+        '42': 'K',
+        '26': 'ERA',
+        '27': 'WHIP'
+    }
+    
+    # Get info from API
+    team_info = session.get(
+        LEAGUE_URL + 'league/' + LEAGUE_ID + '/standings',
+        params={'format': 'json'}
+    )
+    standings_info = session.get(
+        LEAGUE_URL + 'league/' + LEAGUE_ID + \
+        '/standings', params={'format': 'json'}
+    ).json()
+    
+    # Reformat info as dict
+    team_dict = team_info.json()['fantasy_content']['league'][1]['standings'][0]
+    team_dict = team_dict['teams']
+    # keys are ['0', '1', ..., X', 'count'],
+    # where '0'-'X' are the teams
+    for team in team_dict: 
+        if team != 'count':
+            team_info = team_dict[team]['team']
+            team_name = team_info[0][2]['name']
+            team_stats = team_info[1]['team_stats']['stats']
+            tmp = {}
+            for stat_dict in team_stats:
+                s_id = stat_dict['stat']['stat_id']
+                s_val = stat_dict['stat']['value']
+                if s_id in stat_id_map:
+                    tmp[stat_id_map[s_id]] = float(s_val)
+            team_stats_clean[team_name] = tmp
+
+    # convert to dataframe
+    stats_df = pd.DataFrame.from_dict(team_stats_clean, orient='index')
+    stats_df.index.name = 'team'
+
+    return stats_df
