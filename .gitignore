@@ -3,4 +3,9 @@ __pycache__/
 *.egg-info/
 *.py[cod]
 *.$py.class
+
+# hide yahoo api credentials
 Authorization/oauth.json
+
+# backup files
+*.swp
