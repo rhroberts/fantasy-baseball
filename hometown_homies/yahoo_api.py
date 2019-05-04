@@ -1,7 +1,7 @@
 from yahoo_oauth import OAuth2
 from pathlib import Path
 import pandas as pd
-# import ipdb
+import numpy as np
 
 
 LEAGUE_URL = 'https://fantasysports.yahooapis.com/fantasy/v2/'
@@ -303,3 +303,109 @@ def get_team_stats(session):
     stats_df.index.name = 'team'
 
     return stats_df
+
+
+def get_team_averages(session,team_no):
+    """Get statistical summary for a particular team
+    Returns dataframe with statistics up to current week
+    
+    1. First argument is the sessions object for get_session().
+    2. Second argument is the team_no.
+        0 = Rusty
+        1 = Curtis
+        2 = Tjos
+        3 = Luke
+        4 = Marcus
+        5 = Peter
+        6 = Cody W
+        7 = Cody H
+    
+    """
+    
+    # Get league info and grab current_week information
+    league_df = get_league_info(session)
+    current_week = league_df.loc['current_week','Value']
+
+    # Get team information and grab team_key and team_name
+    team_df = get_team_info(session,[team_no])
+    team_key = team_df.loc['team_key',team_df.columns.values[0]]
+    team_name = team_df.loc['name',team_df.columns.values[0]]
+    
+    # Get standings information
+    standings_df = get_league_standings(session)
+    
+    # Create list of weeks
+    weeks = range(1,current_week)
+
+    # Get matchup information
+    matchup_df = get_league_matchup(session,team_key,weeks)
+
+    # Predefine stat_dict
+    stat_dict = {'H/AB*': [],
+                 'R':     [],
+                 'HR':    [],
+                 'RBI':   [],
+                 'SB':    [],
+                 'AVG':   [],
+                 'IP*':   [],
+                 'W':     [],
+                 'SV':    [],
+                 'K':     [],
+                 'ERA':   [],
+                 'WHIP':  [],
+                 'Points':[]}
+    stat_key = list(stat_dict.keys())
+
+    # Preallocate win counter
+    wins_per_category = [0]*len(stat_key)
+
+    # Loop through each weeks results and record stats. 
+    # Count the number of wins per category
+    for i in range(0,len(matchup_df)):
+        for j in range(0,len(stat_key)):
+            team_stat = matchup_df[i][stat_key[j]].iloc[0]
+            if '*' in stat_key[j]:
+                wins_per_category[j] = '-'
+            else:
+                opponent_stat = matchup_df[i][stat_key[j]].iloc[1]
+                if team_stat > opponent_stat:
+                    wins_per_category[j] += 1
+            stat_dict[stat_key[j]].append(matchup_df[i][stat_key[j]].iloc[0])       
+
+    # Loop through each stat and assign an average and win percentage
+    for i in range(0,len(stat_key)):
+        if 'H/AB*' in stat_key[i]:
+            total_avg = np.average(stat_dict['AVG'])
+            total_at_bats = [int(x.split('/')[1]) for x in stat_dict[stat_key[i]]]
+            average_at_bats = np.average(total_at_bats)
+            average_hits = int(total_avg*average_at_bats)
+            stat_dict[stat_key[i]].append(str(average_hits)+'/'+str(int(average_at_bats)))
+            stat_dict[stat_key[i]].append(wins_per_category[i])
+            continue
+        elif '*' in stat_key[i]:
+            stat_dict[stat_key[i]].append(np.average(stat_dict[stat_key[i]]))
+            stat_dict[stat_key[i]].append(wins_per_category[i])
+            continue
+        elif 'Points' in stat_key[i]:
+            stat_dict[stat_key[i]].append(np.average(stat_dict[stat_key[i]]))
+            stat_dict[stat_key[i]].append(standings_df.loc[team_name,'win_rate'])
+            continue
+        stat_dict[stat_key[i]].append(np.average(stat_dict[stat_key[i]]))
+        stat_dict[stat_key[i]].append(wins_per_category[i]/float(len(weeks)))
+
+    # Create row names from weeks
+    indeces = []
+    for i in weeks:
+        indeces.append('Week '+str(i))
+        
+    # Add Average and Win %
+    indeces.append('Average')
+    indeces.append('Win %')
+    stat_dict['Week'] = indeces
+    stat_key.append('Week')
+
+    # Combine dictionary into dataframe
+    average_df = pd.DataFrame(stat_dict,columns=stat_key)
+    average_df = average_df.set_index('Week')
+    
+    return average_df
