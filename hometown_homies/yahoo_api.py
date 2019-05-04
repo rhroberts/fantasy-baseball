@@ -209,12 +209,6 @@ def get_team_info(*arg):
     complete_dict = {}
     tmp_dict = []
     
-    # Name string associated with each team
-    all_names = ['Rusty','Curtis','Tjos','Luke','Marcus','Peter','Cody W','Cody H']
-    
-    # Get reduced set of names
-    names = [all_names[i] for i in teams]
-    
     # Loop through each team in the dictionary
     for i in teams:
         team  = team_dict['fantasy_content']['league'][1]['teams'][str(i)]['team'][0]
@@ -223,27 +217,21 @@ def get_team_info(*arg):
         tmp_dict.append(team)
     
     # Combine all dicts
-    skip = ['managers','roster_adds','team_logos','is_owned_by_current_login']
-    for j in range(0,len(tmp_dict)):
-        d = tmp_dict[j]
-        name = names[j]
-        k = list(d.keys())
-        if j == 0:
-            k_tmp = [x for i, x in enumerate(k) if x not in skip]
-            complete_dict['Variable'] = k_tmp
-        for i in range(0,len(d)):
-            if k[i] in skip:
-                continue
-            complete_dict.setdefault(name, []).append(d[k[i]])
+    for team_dict in tmp_dict:
+        # d = tmp_dict[key_td]
+        team_name = team_dict['name']
+        # deal with those pesky nested dicts
+        for key in team_dict:
+            if key == 'managers':
+                team_dict[key] = team_dict[key][0]['manager']
+            if key == 'team_logos':
+                team_dict[key] = team_dict[key][0]['team_logo']
+        complete_dict[team_name] = team_dict
+
+    team_info_df = pd.DataFrame.from_dict(complete_dict)
+    team_info_df.drop('name', axis=0, inplace=True)
     
-    # Append Variable to names
-    names.append('Variable')
-    
-    # Combine dictionary into dataframe
-    team_df = pd.DataFrame(complete_dict,columns=names)
-    team_df = team_df.set_index('Variable')
-    
-    return team_df
+    return team_info_df
 
 
 def get_team_stats(session):
@@ -275,10 +263,6 @@ def get_team_stats(session):
         LEAGUE_URL + 'league/' + LEAGUE_ID + '/standings',
         params={'format': 'json'}
     )
-    standings_info = session.get(
-        LEAGUE_URL + 'league/' + LEAGUE_ID + \
-        '/standings', params={'format': 'json'}
-    ).json()
     
     # Reformat info as dict
     team_dict = team_info.json()['fantasy_content']['league'][1]['standings'][0]
@@ -329,7 +313,7 @@ def get_team_averages(session,team_no):
     # Get team information and grab team_key and team_name
     team_df = get_team_info(session,[team_no])
     team_key = team_df.loc['team_key',team_df.columns.values[0]]
-    team_name = team_df.loc['name',team_df.columns.values[0]]
+    team_name = team_df.columns.values[0]
     
     # Get standings information
     standings_df = get_league_standings(session)
@@ -409,3 +393,37 @@ def get_team_averages(session,team_no):
     average_df = average_df.set_index('Week')
     
     return average_df
+
+
+def match_team_keys(session, team_list):
+    """
+        takes a list of full OR partial team names OR team indices and
+        converts each respective item to it's unique yahoo team_key,
+        returning a list of all matching keys
+        Issues:
+            - if partial name matches multiple team names
+            no error occurs and first matching name will be used
+    """
+    team_info = get_team_info(session)
+    team_keys = []
+    for team in team_list:
+        if type(team) is int:
+            # return team_key for respective team_id
+            team_key = team_info.loc['team_key'][
+                team_info.loc['team_id'] == str(team)
+            ].values[0]
+            team_keys.append(team_key)
+        elif type(team) is str:
+            # match partial team name to full team name
+            for name in team_info.columns:
+                if name.lower().find(team.lower()) != -1:
+                    team = name
+            # return team_key for respective team name
+            team_key = team_info.loc['team_key'][
+                team_info.columns == str(team)
+            ].values[0]
+            team_keys.append(team_key)
+        else:
+            print('Error: Team identifier not recognized!')
+    
+    return team_keys
