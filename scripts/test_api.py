@@ -1,5 +1,10 @@
 """You can run this to test your creds are ok."""
 
+# Suppress logging in what is a bad way, I assume. 
+import logging
+oauth_logger = logging.getLogger('matplotlib')
+oauth_logger.disabled = True
+
 from hometown_homies import yahoo_api
 import pandas as pd
 from pandas.io.json import json_normalize
