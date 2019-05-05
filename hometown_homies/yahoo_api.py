@@ -2,6 +2,7 @@ from yahoo_oauth import OAuth2
 from pathlib import Path
 import pandas as pd
 import numpy as np
+# import ipdb
 
 
 LEAGUE_URL = 'https://fantasysports.yahooapis.com/fantasy/v2/'
@@ -192,15 +193,15 @@ def get_team_info(*arg):
     """Get basic team information from a Yahoo session object
     
     1. First argument is the sessions object for get_session().
-    2. Second argument is a list of indices (0-7) to specify which teams to pull data for.
-        0 = Rusty
-        1 = Curtis
-        2 = Tjos
-        3 = Luke
-        4 = Marcus
-        5 = Peter
-        6 = Cody W
-        7 = Cody H
+    2. Second argument is a list of indices (or team names) to specify which teams to pull data for.
+        1 = Lone Star Tallboys    = Rusty
+        2 = Curt's American Made  = Curtis
+        3 = Death By Smalls       = Tjos
+        4 = Luke's Legit Team     = Luke
+        5 = Hello World           = Marcus
+        6 = Mookie and the Betts  = Peter
+        7 = Soggy Dingers         = Cody W
+        8 = Chuck Nazty           = Cody H
     3. If there is no second argument, returns a dataframe for all teams in the league.
     
     """
@@ -209,7 +210,7 @@ def get_team_info(*arg):
     if len(arg) > 1:
         teams = arg[1]
     else:
-        teams = range(0,8)
+        teams = range(1,9)
     session = arg[0]
     
     # Get info from API
@@ -224,7 +225,7 @@ def get_team_info(*arg):
     
     # Loop through each team in the dictionary
     for i in teams:
-        team  = team_dict['fantasy_content']['league'][1]['teams'][str(i)]['team'][0]
+        team  = team_dict['fantasy_content']['league'][1]['teams'][str(i-1)]['team'][0]
         team = [x for x in team if x != []]
         team = {k: v for d in team for k, v in d.items()}
         tmp_dict.append(team)
@@ -302,31 +303,31 @@ def get_team_stats(session):
     return stats_df
 
 
-def get_team_averages(session,team_no):
+def get_team_averages(session,team):
     """Get statistical summary for a particular team
     Returns dataframe with statistics up to current week
     
     1. First argument is the sessions object for get_session().
     2. Second argument is the team_no.
-        0 = Rusty
-        1 = Curtis
-        2 = Tjos
-        3 = Luke
-        4 = Marcus
-        5 = Peter
-        6 = Cody W
-        7 = Cody H
+        1 = Lone Star Tallboys    = Rusty
+        2 = Curt's American Made  = Curtis
+        3 = Death By Smalls       = Tjos
+        4 = Luke's Legit Team     = Luke
+        5 = Hello World           = Marcus
+        6 = Mookie and the Betts  = Peter
+        7 = Soggy Dingers         = Cody W
+        8 = Chuck Nazty           = Cody H
     
     """
     
     # Get league info and grab current_week information
     league_df = get_league_info(session)
     current_week = league_df.loc['current_week','Value']
-
+    
     # Get team information and grab team_key and team_name
-    team_df = get_team_info(session,[team_no])
-    team_key = team_df.loc['team_key',team_df.columns.values[0]]
-    team_name = team_df.columns.values[0]
+    team_df = get_team_info(session)
+    team_key = match_team_keys(team_df, [team])[0] # Interpret team variables
+    team_name = team_df.columns.values[int(team_key[-1])-1]
     
     # Get standings information
     standings_df = get_league_standings(session)
@@ -408,7 +409,7 @@ def get_team_averages(session,team_no):
     return average_df
 
 
-def match_team_keys(session, team_list):
+def match_team_keys(team_info, team_list):
     """
         takes a list of full OR partial team names OR team indices and
         converts each respective item to it's unique yahoo team_key,
@@ -417,7 +418,8 @@ def match_team_keys(session, team_list):
             - if partial name matches multiple team names
             no error occurs and first matching name will be used
     """
-    team_info = get_team_info(session)
+    # Editted to pass team_info dataframe into definition
+    # team_info = get_team_info(session) 
     team_keys = []
     for team in team_list:
         if type(team) is int:
