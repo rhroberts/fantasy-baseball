@@ -24,7 +24,7 @@ def get_session(auth_file=None):
 
 
 def get_league_info(session):
-    """Get league info from a Yahoo session object"""
+    """Get league and team info from a Yahoo session object"""
     
     # Get info from API
     league_info = session.get(LEAGUE_URL + 'league/' + LEAGUE_ID, params={'format': 'json'})
@@ -46,8 +46,42 @@ def get_league_info(session):
     # Combine dictionary into dataframe
     league_df = pd.DataFrame(complete_dict,columns=['Value','Variable'])
     league_df = league_df.set_index('Variable')
+
+    teams = range(1,9)
+
+    # Get info from API
+    team_info = session.get(LEAGUE_URL + 'league/' + LEAGUE_ID + '/teams', params={'format': 'json'})
     
-    return league_df
+    # Reformat info as dict
+    team_dict = team_info.json()
+    
+    # Preallocate variables
+    complete_dict = {}
+    tmp_dict = []
+    
+    # Loop through each team in the dictionary
+    for i in teams:
+        team  = team_dict['fantasy_content']['league'][1]['teams'][str(i-1)]['team'][0]
+        team = [x for x in team if x != []]
+        team = {k: v for d in team for k, v in d.items()}
+        tmp_dict.append(team)
+    
+    # Combine all dicts
+    for team_dict in tmp_dict:
+        # d = tmp_dict[key_td]
+        team_name = team_dict['name']
+        # deal with those pesky nested dicts
+        for key in team_dict:
+            if key == 'managers':
+                team_dict[key] = team_dict[key][0]['manager']
+            if key == 'team_logos':
+                team_dict[key] = team_dict[key][0]['team_logo']
+        complete_dict[team_name] = team_dict
+
+    teams_df = pd.DataFrame.from_dict(complete_dict)
+    teams_df.drop('name', axis=0, inplace=True)
+    
+    return(league_df, teams_df)
 
 
 def get_league_standings(session):
@@ -106,8 +140,8 @@ def get_league_matchup(session, team, weeks):
             3. a single week integer or a list of weeks
     """
 
-    # convert team_list to yahoo team keys
-    team_key = match_team_keys(session, [team])[0]
+    # convert team identifier to yahoo team key
+    team_key = match_team_keys(get_league_info(session)[1], team)[0]
     
     # Get URL with team_key and weeks
     url = LEAGUE_URL + 'team/' + LEAGUE_ID + team_key[-4:]+'/matchups;weeks='
@@ -189,11 +223,12 @@ def get_league_matchup(session, team, weeks):
     return matchup_df
 
 
-def get_team_info(*arg):
+def get_team_info(session, team_list='all'):
     """Get basic team information from a Yahoo session object
     
     1. First argument is the sessions object for get_session().
-    2. Second argument is a list of indices (or team names) to specify which teams to pull data for.
+    2. Second argument is a team identifier or list of
+        team identifiers, including partal team names or team_ids:
         1 = Lone Star Tallboys    = Rusty
         2 = Curt's American Made  = Curtis
         3 = Death By Smalls       = Tjos
@@ -205,50 +240,30 @@ def get_team_info(*arg):
     3. If there is no second argument, returns a dataframe for all teams in the league.
     
     """
-    
-    # Split arguments
-    if len(arg) > 1:
-        teams = arg[1]
-    else:
-        teams = range(1,9)
-    session = arg[0]
-    
-    # Get info from API
-    team_info = session.get(LEAGUE_URL + 'league/' + LEAGUE_ID + '/teams', params={'format': 'json'})
-    
-    # Reformat info as dict
-    team_dict = team_info.json()
-    
-    # Preallocate variables
-    complete_dict = {}
-    tmp_dict = []
-    
-    # Loop through each team in the dictionary
-    for i in teams:
-        team  = team_dict['fantasy_content']['league'][1]['teams'][str(i-1)]['team'][0]
-        team = [x for x in team if x != []]
-        team = {k: v for d in team for k, v in d.items()}
-        tmp_dict.append(team)
-    
-    # Combine all dicts
-    for team_dict in tmp_dict:
-        # d = tmp_dict[key_td]
-        team_name = team_dict['name']
-        # deal with those pesky nested dicts
-        for key in team_dict:
-            if key == 'managers':
-                team_dict[key] = team_dict[key][0]['manager']
-            if key == 'team_logos':
-                team_dict[key] = team_dict[key][0]['team_logo']
-        complete_dict[team_name] = team_dict
+    # get all team info from get_league_info()
+    _, team_info = get_league_info(session)
 
-    team_info_df = pd.DataFrame.from_dict(complete_dict)
-    team_info_df.drop('name', axis=0, inplace=True)
-    
-    return team_info_df
+    # default is to return info for all teams
+    # matching the team_info result from get_league_info
+    if team_list == 'all':
+        return team_info
+
+    # convert to list if only a single team identifier is given
+    if type(team_list) is not list:
+        team_list = list([team_list])
+
+    # convert team identifier(s) to full team names
+    team_keys = match_team_keys(team_info, team_list)
+    team_names = []
+    for name in team_info.columns:
+        if team_info[name].loc['team_key'] in team_keys:
+            team_names.append(name)
+
+    # return appropriate slice of team_info
+    return team_info[team_names]
 
 
-def get_team_stats(session):
+def get_stat_totals(session):
     """
         Get basic team stats (season to date) from a Yahoo session object
         Return a dataframe with info for all teams
@@ -308,7 +323,8 @@ def get_team_averages(session,team):
     Returns dataframe with statistics up to current week
     
     1. First argument is the sessions object for get_session().
-    2. Second argument is the team_no.
+    2. Second argument is a single team identifier
+        such as a full or partial team name or the team_id:
         1 = Lone Star Tallboys    = Rusty
         2 = Curt's American Made  = Curtis
         3 = Death By Smalls       = Tjos
@@ -320,13 +336,12 @@ def get_team_averages(session,team):
     
     """
     
-    # Get league info and grab current_week information
-    league_df = get_league_info(session)
+    # Get league and team info and grab current_week information
+    league_df, team_df = get_league_info(session)
     current_week = league_df.loc['current_week','Value']
     
-    # Get team information and grab team_key and team_name
-    team_df = get_team_info(session)
-    team_key = match_team_keys(team_df, [team])[0] # Interpret team variables
+    # Grab team_key and team_name
+    team_key = match_team_keys(team_df, [team])[0]
     team_name = team_df.columns.values[int(team_key[-1])-1]
     
     # Get standings information
@@ -336,7 +351,7 @@ def get_team_averages(session,team):
     weeks = range(1,current_week)
 
     # Get matchup information
-    matchup_df = get_league_matchup(session,team_key,weeks)
+    matchup_df = get_league_matchup(session,team,weeks)
 
     # Predefine stat_dict
     stat_dict = {'H/AB*': [],
@@ -417,9 +432,16 @@ def match_team_keys(team_info, team_list):
         Issues:
             - if partial name matches multiple team names
             no error occurs and first matching name will be used
+        Arguments:
+            1. team_info dataframe that get you from calling
+                get_team_info(session)
+                NOTE: make sure to call with only a session object
+                as an argument, such that info for all teams is returned
+            2. Single team identifier (integer team_id for full or partial team name) or list of team identifiers
     """
-    # Editted to pass team_info dataframe into definition
-    # team_info = get_team_info(session) 
+
+    if type(team_list) is not list:
+        team_list = list([team_list])
     team_keys = []
     for team in team_list:
         if type(team) is int:
