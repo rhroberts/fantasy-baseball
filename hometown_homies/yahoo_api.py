@@ -1,9 +1,12 @@
-from yahoo_oauth import OAuth2
 from pathlib import Path
 import pandas as pd
 import numpy as np
-# import ipdb
+import logging
 
+# Suppress excessive matplotlib logging from yahoo_oauth
+oauth_logger = logging.getLogger('matplotlib')
+oauth_logger.disabled = True
+from yahoo_oauth import OAuth2
 
 LEAGUE_URL = 'https://fantasysports.yahooapis.com/fantasy/v2/'
 LEAGUE_ID = 'mlb.l.69542'
