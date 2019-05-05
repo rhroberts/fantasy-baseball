@@ -95,11 +95,24 @@ def get_league_standings(session):
     return standings_df
 
 
-def get_league_matchup(session,team_key,weeks):
-    """Get leage matchup from a Yahoo session object"""
+def get_league_matchup(session, team, weeks):
+    """
+        Get leage matchup from a Yahoo session object
+        Arguments:
+            1. a session object,
+            2. a single team identifier
+                (full/partial-but-unique team name or team_id integer)
+            3. a single week integer or a list of weeks
+    """
+
+    # convert team_list to yahoo team keys
+    team_key = match_team_keys(session, [team])[0]
     
     # Get URL with team_key and weeks
     url = LEAGUE_URL + 'team/' + LEAGUE_ID + team_key[-4:]+'/matchups;weeks='
+    # if an int-type single week number is given, convert to list
+    if type(weeks) is int:
+        weeks = list([weeks])
     if len(weeks) > 1:
         for i in range(0,len(weeks)-1):
             url = url+str(weeks[i])+','
