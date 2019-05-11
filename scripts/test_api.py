@@ -8,12 +8,11 @@ oauth_logger.disabled = True
 from hometown_homies import yahoo_api
 import pandas as pd
 from pandas.io.json import json_normalize
-import ipdb
 
 sess = yahoo_api.get_session()
 
 # Example usage for get_league_info()
-league_info = yahoo_api.get_league_info(sess)
+league_info, team_info = yahoo_api.get_league_info(sess)
 league_name = league_info.loc['name'].values[0]
 print(f"Our league name is: {league_name}!!!")
 print()
@@ -23,15 +22,15 @@ print("Here's the current status of the league:")
 print(standings_df)
 print()
 
-# Example usage for get_league_team()
+# Example usage for get_team_info()
 team_info  = yahoo_api.get_team_info(sess,[1,2,3,4])  # Get team info for Rusty, Curtis, Tjos, and Luke
 team_dmarc = yahoo_api.get_team_info(sess,[5])        # Get team info for Marcus only
 team_info2 = yahoo_api.get_team_info(sess)            # Get team info for everyone
 
 # Example usage for get_league_matchup()
-team_key = team_dmarc.loc['team_key',team_dmarc.columns.values[0]]
+team = 'Hello World'
 weeks = [1,2,3,4,5]
-matchup_info = yahoo_api.get_league_matchup(sess,team_key,weeks)
+matchup_info = yahoo_api.get_league_matchup(sess,team,weeks)
 
 # Temporary print to visualize matchup_info
 for i in range(0,len(matchup_info)):
