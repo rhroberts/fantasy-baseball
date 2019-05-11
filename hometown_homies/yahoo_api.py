@@ -1,9 +1,18 @@
+import logging
+mpl_logger = logging.getLogger('matplotlib') 
+mpl_logger.setLevel(logging.WARNING) 
+mpl_logger = logging.getLogger('matplotlib.dates') 
+mpl_logger.setLevel(logging.WARNING) 
+mpl_logger = logging.getLogger('matplotlib.ticker') 
+mpl_logger.setLevel(logging.WARNING) 
 from yahoo_oauth import OAuth2
+import logging
+oauth_logger = logging.getLogger('yahoo_oauth')
+oauth_logger.disabled = True
 from pathlib import Path
 import pandas as pd
 import numpy as np
 # import ipdb
-
 
 LEAGUE_URL = 'https://fantasysports.yahooapis.com/fantasy/v2/'
 LEAGUE_ID = 'mlb.l.69542'
@@ -64,7 +73,7 @@ def get_league_standings(session):
     # where '0'-'X' are the teams
     for key in standings_dict: 
         if key != 'count':
-            team_info = standings_dict[key]['team']
+            team_info = standings_dict[key]['Team']
             team_name = team_info[0][2]['name']
             team_standings = team_info[2]['team_standings']
 
@@ -91,7 +100,7 @@ def get_league_standings(session):
         current_standings, orient='index'
     )        
     standings_df.sort_values('rank', inplace=True)
-    standings_df.index.name = 'team'
+    standings_df.index.name = 'Team'
     
     return standings_df
 
@@ -267,12 +276,12 @@ def get_team_stats(session):
     
     # Reformat info as dict
     team_dict = team_info.json()['fantasy_content']['league'][1]['standings'][0]
-    team_dict = team_dict['teams']
+    team_dict = team_dict['Team']
     # keys are ['0', '1', ..., X', 'count'],
     # where '0'-'X' are the teams
     for team in team_dict: 
         if team != 'count':
-            team_info = team_dict[team]['team']
+            team_info = team_dict[team]['Team']
             team_name = team_info[0][2]['name']
             team_stats = team_info[1]['team_stats']['stats']
             tmp = {}
@@ -285,7 +294,7 @@ def get_team_stats(session):
 
     # convert to dataframe
     stats_df = pd.DataFrame.from_dict(team_stats_clean, orient='index')
-    stats_df.index.name = 'team'
+    stats_df.index.name = 'Team'
 
     return stats_df
 
