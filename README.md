@@ -1,10 +1,8 @@
-Some friends dabing in sabermetrics and things.
-
-Please see [CONTRIBUTING.md](./CONTRIBUTING.md) for guidance on how to contribute.
+Some friends dabbling in sabermetrics and things.
 
 # Installation
 
-Make yourself a shiny new conda (or virtualenv, I guess) environment like so:
+Make yourself a shiny new conda (or virtualenv) environment like so:
 
 ``` shell
 conda create --name fantasy-baseball python=3.X
@@ -15,18 +13,6 @@ then, from the project root, pip install this package ~in editable mode`
 ``` shell
 pip install -e ./
 ```
-
-You can read some info here, I found it helpful a bit. - CRT
-``` shell
-https://packaging.python.org/guides/installing-using-pip-and-virtual-environments/
-```
-
-
-Python copies packages to a subfolder of it's installation directory when you install them.
-If you want to actively hack away at a project and also have it installed, this is a problem.
-We solve this with editable mode, which drops a link in the installation directory back to
-package directory where it was when you installed, instead of moving it. Try running `pip list`
-now, you'll see the difference.
 
 ## Yahoo Auth
 
