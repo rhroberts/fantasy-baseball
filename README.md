@@ -1,4 +1,4 @@
-Some friends dabbling in sabermetrics and things.
+Some friends dabbling with the yahoo sports API for their fantasy baseball league.
 
 # Installation
 
